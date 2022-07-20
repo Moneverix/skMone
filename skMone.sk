@@ -1,0 +1,320 @@
+#              					W E L C O M E  T O  S K  M O N E
+#              Point of this plugin is to make life easier both for players and staff members.
+#
+#              					ENJOY YOUR TIME USING THIS PLUGIN
+#
+#    		   					MADE ENTIRELY BY MONE / MONEVERIX
+#
+#
+#
+#
+#
+# ------------------------------------#OPTIONS#------------------------------------ #
+options:
+    # SKMONE PREFIX
+	prefix: &7『&eSk&6M&7』
+	# SKMONE VERSION
+	version: &av1.0
+	# SKMONE COMMAND USAGE
+	usage: &c/skmone <help>/<credits>/<reload>/<version>
+	# PERMISSIONS LIST:
+	p1: skmone.godmode #Permission to use /godmode command
+	p2: skmone.reload #Permission to reload the script
+	p3: skmone.warn #Permission to warn other players
+	p4: skmone.resetwarns #Permission to reset ALL warns from other players
+	p5: skmone.freeze #Permission to freeze players
+	p6: skmone.admingui #Permission to use the StaffGUI
+	p7: skmone.delwarn #Permission to delete warns from player's [not all of them, only the number you input]
+	p8: skmone.clearchat #Permission to clear the chat
+	p9: skmone.maxwarns #Permission to set the max amount of warns to ban a player
+# ------------------------------------#OPTIONS#------------------------------------ #
+
+# ------------------------------------#VARIABLES#------------------------------------ #
+
+variables:
+	{godmode::%player%} = false
+	{spacing} = "&7=-=-=-=-="
+	{pane} = black stained glass pane
+	{warnscount::%player%} = 0
+	{freezed::%player%} = false
+	{warn::maxwarns} = 3
+# ------------------------------------#VARIABLES#------------------------------------ #
+
+# ------------------------------------#GOD MODE COMMAND#------------------------------------ #
+command /godmode [<offline player>]:
+	permission: {@p1}
+	permission message: {@prefix} &8| &cMissing Permissions. ({@p1})
+	trigger:
+		if arg-1 is not a player or "credits" or "reload" or "version":
+			send "{@prefix} &8| &c/godmode <player>" to player
+		if arg-1 is a player:
+			if {godmode::%player%} = false:
+				set {godmode::%player%} to true
+				send "{@prefix} &8| &aGodmode activated for %arg-1%!" to player
+			else:
+				set {godmode::%player%} to false
+				send "{@prefix} &8| &cGodmode deactivated for %arg-1%!" to player
+on damage:
+	if {godmode::%victim%} = true:
+		cancel event
+# ------------------------------------#GOD MODE COMMAND#------------------------------------ #
+
+
+#-------------------------------------#MAIN COMMAND#---------------------------------------- #
+
+command /skmone [<text>] [<number>]:
+	trigger:
+		if arg-1 is not a player or "credits" or "reload" or "version" or "help":
+			send "{@prefix} &8| {@usage}" to player
+		if arg-1 = "credits":
+			send "%{spacing}%&eCredits%{spacing}%" to player
+			send "&aMoneverix &e- &2Skripting/Testing" to player
+			send "&azDeadblue &e- &2Giving Ideas" to player
+			send "&aTheCreeperyXZ &e- &2Testing the Plugin" to player
+			send "%{spacing}%&7『&eSk&6M&7』%{spacing}%" to player
+		if arg-1 = "reload":
+			if player doesn't have permission "op" or "skmone.reload":
+				send "{@prefix} &8| &cMissing Permissions. ({@p2})" to player
+			else:
+				send "{@prefix} &8| &eReloading Script!"
+				make console execute command "/sk reload skMone.sk"
+				wait 3 seconds
+				send "{@prefix} &8| &eReloading Completed! (Look at console to check if any errors occured.)"
+		if arg-1 = "version":
+			send "%{spacing}%%{spacing}%%{spacing}%%{spacing}%%{spacing}%" to player
+			send "{@prefix} &8| &aCurrent plugin version: {@version} &e(Latest)" to player
+			send "%{spacing}%%{spacing}%%{spacing}%%{spacing}%%{spacing}%" to player
+		if arg-1 = "help":
+			send "%{spacing}%%{spacing}% 『&eSk&6M&7』 %{spacing}%%{spacing}%" to player
+			send "&9Main Commands:" to player
+			send "&a/skmone &6- &eDisplay command usage." to player
+			send "&a/skmone help &6- &eDisplays this help message" to player
+			send "&a/skmone version &6- &eShows current script version." to player
+			send "&a/skmone credits &6- &eskMone credits" to player
+			send "&a/skmone reload &6- &eReloads the script." to player
+			send "&9Warn System: (Admin Commands)" to player
+			send "&a/warn <player> (reset) &6- &eLets you warn other players." to player
+			send "&a/warns <player> &6- &e(No Admin Needed) Lets you check player's amount of warns." to player
+			send "&a/delwarn <player> &6- &eLets you remove warns from other players." to player
+			send "&9Staff Commands: (Admin Commands)" to player
+			send "&a/freeze <player> &6- &eLets you prevent a player from moving." to player
+			send "&a/staffgui &6- &eStaff GUI with useful stuff." to player
+			send "&8&l[PREV] &0&L// &a&l<command: /skmone help 2>[NEXT]<reset>" to player
+		if arg-2 = 2:
+			send "%{spacing}%%{spacing}% 『&ePage 2』 %{spacing}%%{spacing}%" to player
+			send "&a// Nothing here yet.. \\" to player
+			send "&c&l<command: /skmone help>[PREV]<reset> &0&L// &8&l[NEXT]" to player
+			send "&9Staff Commands: (Admin Commands)" to player
+			send "&a/clearchat \\ /cc &6- &eClears the chat." to player
+			send "&a/godmode <player> &6- &eBecome invincible." to player
+
+
+
+#-------------------------------------#MAIN COMMAND#---------------------------------------- #
+
+#-------------------------------------#WARN SYSTEM#---------------------------------------- #
+
+command /warn [<offline player>] [<text>]:
+	permission: "skmone.warn", "op"
+	permission message: {@prefix} &8| &cMissing Permissions. ({@p3})
+	trigger:
+		if arg-1 is not a player:
+			send "{@prefix} &8| &c/warn <player> or /warn <player> reset"
+		else:
+			if {warn::%player%::reason} = player:
+				set {warn::%player%::reason} to "No Reason."
+			set {pwarn::%player%} to arg 1	
+			set {_warn::gui} to a new chest inventory with 3 row named "&c&lWarn a Player."
+			set slot 0 and 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 17 and 26 and 25 and 24 and 23 and 22 and 21 and 20 and 19 and 18 and 9 of {_warn::gui} to {pane} named "&c&kkkkkkk"
+			set slot 16 of {_warn::gui} to arg-1's skull named "&cPlayer you're trying to warn:" with lore "&9%arg-1%" and "&cWarns: %{warnscount::%player%}%"
+			set slot 10 of {_warn::gui} to book named "&aWrite a Reason:" with lore "&eCurrent Reason: &c%{warn::%player%::reason}%"
+			set slot 13 of {_warn::gui} to red dye of infinity 1 named "&4Warn Player"
+			set slot 22 of {_warn::gui} to paper of infinity 1 named "&eNote:" with lore "&9%{warn::maxwarns}% warns = 1 day ban" and "&9&lBe careful with what you're doing."
+			open {_warn::gui} to player
+		if arg-2 = "reset":
+			if player has permission "{@p4}":
+				close player's inventory
+				set {pwarnreset::%player%} to arg 1
+				send "&6Resetting warnings for &l%{pwarnreset::%player%}%"
+				set {warnscount::%{pwarn::%player%}%} to 0
+			else:
+				send "&cMissing Permissions. ({@p4})"
+
+on inventory click:
+	if name of player's current inventory is "&c&lWarn a Player.":
+		if index of event-slot = 0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 17 or 26 or 25 or 24 or 23 or 22 or 21 or 20 or 19 or 18 or 9 or 16:
+			cancel event
+		if index of event-slot = 10:
+			cancel event
+			close player's inventory
+			if {warn.chat::%player%} is not set:
+				set {warn.chat::%player%} to true
+				send "{@prefix} &8| &aWrite the warn reason for %{pwarn::%player%}%! Type 'cancel' to cancel this."
+		if index of event-slot = 13:
+			cancel event
+			add 1 to {warnscount::%{pwarn::%player%}%}
+			if {warnscount::%player%} is higher than {warn::maxwarns}-1:
+				make console execute command "/warn %{pwarn::%player%}% reset"
+				kick {pwarn::%player%}
+				ban {pwarn::%player%} due to "You've reached the warnings limit! (%{warn::maxwarns}%)" for 1 day
+			send "{@prefix} &7| &8You've been warned for &4%{warn::%player%::reason}% &7by %event-player%" to {pwarn::%player%}
+			send title "&8[&C&LWARN&8]" with subtitle "&8You've been warned by &8&l%event-player% &8for &4%{warn::%player%::reason}%" to {pwarn::%player%}
+		if index of event-slot = 22:
+			cancel event
+on chat:
+	if {warn.chat::%player%} is true:
+		cancel event
+		set {_warnreason} to the chat message
+		if {_warnreason} is "cancel":
+			delete {warn.chat::%player%}
+			send "{@prefix} &8| &cCancelled!" to player
+		else:
+			set {warn::%player%::reason} to {_warnreason}
+			execute console command "/warn %{pwarn::%player%}% reset"
+			delete {warn.chat::%player%}
+			send "{@prefix} &8| &a&lReason has been set!" to player
+
+on inventory close:
+	if name of player's current inventory is "&c&lWarn a Player.":
+		set {warn::%player%::reason} to "No Reason"
+
+command /warns [<offline player>]:
+	permission: "{@p7}"
+	permission message: {@prefix} &8| &cMissing Permissions. ({@p7})
+	trigger:
+		if arg-1 is not set:
+			send "&c/warns <player>"
+		else:
+			if {warnscount::%arg-1%} is not set:
+				set {warnscount::%arg-1%} to 0
+			set metadata tag "warningsGUI" of player to chest inventory with 1 row named "&9%arg-1%'s Warnings:"
+			set slot 0 and 1 and 2 and 3 and 5 and 6 and 7 and 8 of metadata tag "warningsGUI" of player to {pane} named "&c&kkkkkkk"
+			set slot 4 of metadata tag "warningsGUI" of player to arg-1's skull named "&e%arg-1%" with lore "&9Current Warnings: &b%{warnscount::%arg-1%}%"
+			open (metadata tag "warningsGUI" of player) to player
+
+on inventory click:
+	if event-inventory = (metadata tag "warningsGUI" of player):
+		cancel event
+
+command /delwarn [<offline player>] [<number>]:
+	trigger:
+		if arg-1 is not a player:
+			send "{@prefix} &8| &c/delwarn <player> <number>" to player
+		if arg-2 is not a number:
+			send "{@prefix} &8| &c/delwarn <player> <number>" to player
+		else:
+			if arg-2 is higher than {warnscount::%arg-1%}:
+				send "&cThe number that you input is higher than player's current number of warnings!"
+			else:
+				remove arg-2 from {warnscount::%arg-1%}
+				send "&6Removed %arg-2% warns from &l%arg-1%&6!"
+
+command /maxwarns [<number>]:
+	permission: {@p9}
+	permission message: &cMissing Permissions. ({@p9})
+	trigger:
+		if arg-1 is not set:
+			send "{@prefix} &8| &c/maxwarns <number>" to player
+		if arg-1 is not a number:
+			send "{@prefix} &8| &c/maxwarns <number>" to player
+		else:
+			set {warn::maxwarns} to arg-1
+			send "&6The number of max warnings is now set to &l%{warn::maxwarns}%"
+
+#-------------------------------------#WARN SYSTEM#---------------------------------------- #
+
+#-------------------------------------#FREEZE COMMAND#---------------------------------------- #
+
+command /freeze [<offline player>]:
+	permission: {@p5}
+	permission message: {@prefix} &8| &cMissing Permissions. ({@p5})
+	trigger:
+		if arg-1 is not a player:
+			send "{@prefix} &8| &c/freeze <player>" to player
+		else:
+			if {freezed::%arg-1%} = false:
+				set {freezed::%arg-1%} to true
+				send "{@prefix} &8| &9You got freezed by %player%!" to arg-1
+				play sound "minecraft:block.glass.break" with volume 100 to player
+				send "{@prefix} &8| &9Successfully freezed %arg-1%!"
+			else:
+				if {freezed::%arg-1%} = true:
+					set {freezed::%arg-1%} to false
+					send "{@prefix} &8| &bYou got unfreezed by %player%!" to arg-1
+					play sound "minecraft:block.glass.break" with volume 100 to player
+					send "{@prefix} &8| &bSuccessfully unfreezed %arg-1%!" to player
+
+on player move:
+	if {freezed::%player%} = true:
+		cancel event
+
+#-------------------------------------#FREEZE COMMAND#---------------------------------------- #
+
+#-------------------------------------#STAFF GUI#---------------------------------------- #
+
+command /staffgui:
+	permission: "{@p6}"
+	permission message: {@prefix} &8| &cMissing Permissions. ({@p6})
+	trigger:
+		set metadata tag "staffGUI" of player to chest inventory with 6 rows named "{@prefix} &8| &cStaff GUI"
+		set slot 0 and 1 and 9 and 7 and 8 and 17 and 44 and 53 and 52 and 46 and 45 and 36 of metadata tag "staffGUI" of player to {pane} named "&c&kkkkkkk"
+		set slot 20 of metadata tag "staffGUI" of player to packed ice named "&9Freeze/Unfreeze a Player" with lore "&aType player's name to prevent them from moving!"
+		set slot 22 of metadata tag "staffGUI" of player to book named "&9Clear Chat" with lore "&aClears the chat, Simple."
+		set slot 24 of metadata tag "staffGUI" of player to diamond helmet named "&9Godmode" with lore "&aMake someone invincible." with all flags hidden
+		set slot 4 of metadata tag "staffGUI" of player to paper of infinity 1 named "&c&aWhat is this?" with lore "&eThis is a simple GUI" and "&ewith useful commands" and "&efor your staff members!" with all flags hidden
+		set slot 49 of metadata tag "staffGUI" of player to barrier named "&4Close GUI"
+		set slot 40 of metadata tag "staffGUI" of player to poppy of infinity 1 named "&cMore Soon ^^" with lore "&eStay tuned for more updates to the script!" with all flags hidden
+		open (metadata tag "staffGUI" of player) to player
+
+on inventory click:
+	if event-inventory = (metadata tag "staffGUI" of player):
+		cancel event
+		if index of event-slot = 20:
+			close player's inventory
+			send "&aType player's name to freeze/unfreeze them! (Or type 'cancel' to cancel this.)" to player
+			set {freeze.chat::%player%} to true
+		if index of event-slot = 49:
+			close player's inventory
+		if index of event-slot = 22:
+			make player execute command "/clearchat"
+		if index of event-slot = 24:
+			close player's inventory
+			send "&aType player's name to godmode/ungodmode them! (Or type 'cancel' to cancel this.)" to player
+			set {godmode.chat::%player%} to true
+
+on chat: #FOR FREEZE IN THE GUI
+	if {freeze.chat::%player%} = true:
+		cancel event
+		set {_freezechat} to the chat message
+		if {_freezechat} = "cancel":
+			delete {freeze.chat::%player%}
+			send "{@prefix} &8| &cCancelled!" to player
+		else:
+			make player execute command "/freeze %{_freezechat}%"
+			make player execute command "/staffgui"	
+			delete {freeze.chat::%player%}
+
+#-------------------------------------#CLEAR CHAT#---------------------------------------- #
+
+command /clearchat:
+	aliases: /cc
+	permission: {@p8}
+	permission message: &cMissing Permissions. ({@p8})
+	trigger:
+		loop 100 times:
+			broadcast " "
+		broadcast "{@prefix} &8| &aChat Cleared by %player%"
+
+#-------------------------------------#CLEAR CHAT#---------------------------------------- #
+
+on chat: #FOR GODMODE IN THE GUI
+	if {godmode.chat::%player%} = true:
+		cancel event
+		set {_godmodechat} to the chat message
+		if {_godmodechat} = "cancel":
+			delete {godmode.chat::%player%}
+			send "{@prefix} &8| &cCancelled!" to player
+		else:
+			make player execute command "/godmode %{_godmodechat}%"
+			make player execute command "/staffgui"	
+			delete {godmode.chat::%player%}
